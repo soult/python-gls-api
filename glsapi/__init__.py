@@ -75,14 +75,22 @@ class Address:
     @classmethod
     def parse(cls, data):
         return cls(
-            name1=data["name1"],
+            name1=data.get("name1") or None,
             name2=data.get("name2") or None,
             name3=data.get("name3") or None,
-            street1=data.get("street1"),
+            street1=data.get("street1") or None,
             street2=data.get("street2") or None,
             postal_code=data["postalArea"]["postalCode"],
             city=data["postalArea"]["city"],
             country_code=data["postalArea"]["countryCode"]
+        )
+
+    @classmethod
+    def parse_area(cls, data):
+        return cls(
+            postal_code=data["postalCode"],
+            city=data["city"],
+            country_code=data["countryCode"]
         )
 
 class Parcel:
@@ -92,9 +100,19 @@ class Parcel:
             self.__dict__[k] = kwargs.get(k)
 
     @classmethod
+    def parse_short(cls, data):
+        parcel = cls(
+            tracking_number = data.get("tuNo"),
+            date=datetime.date(*[int(x) for x in data["date"].split("-")])
+        )
+        parcel.recipient = Address.parse_area(data["addressInfo"])
+        parcel.recipient.name1 = data.get("consigneeName") or None
+        return parcel
+
+    @classmethod
     def parse(cls, data):
         parcel = cls(
-            tracking_number=data.get("referenceNo"),
+            tracking_number=data.get("tuNo"),
             date=data.get("date")
         )
         for item in data.get("addresses", []):
@@ -186,20 +204,9 @@ class GLSBrowser:
         }
         req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rstt003")
 
-        parcel = collections.namedtuple("Parcel", ["tracking_number", "date", "name", "postal_code", "city", "country", "status"])
-
         parcels = []
         for item in req.json()["tuStatus"]:
-            print(Parcel.parse(item))
-            parcels.append(parcel(
-                item["referenceNo"],
-                item["date"],
-                item["consigneeName"] or None,
-                item["addressInfo"]["postalCode"] or None,
-                item["addressInfo"]["city"] or None,
-                item["addressInfo"]["countryCode"] or None,
-                item["progressBar"]["statusInfo"]
-            ))
+            parcels.append(Parcel.parse_short(item))
 
         return parcels
 
