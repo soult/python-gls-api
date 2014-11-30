@@ -1,4 +1,6 @@
 import io
+import itertools
+import operator
 import subprocess
 
 try:
@@ -7,6 +9,18 @@ except:
     PIL_AVAILABLE = False
 else:
     PIL_AVAILABLE = True
+
+def check_digit(tracking_number):
+    """
+    Calculates the check digit for the given tracking number.
+
+    See chapter 3.2.1 in
+    https://gls-group.eu/DE/media/downloads/GLS_Uni-Box_TechDoku_2D_V0110_01-10-2012_DE-download-4424.pdf
+    """
+    check_digit = 10 - ((sum(itertools.starmap(operator.mul, zip(itertools.cycle((3, 1)), map(int, str(tracking_number))))) + 1) % 10)
+    if check_digit == 10:
+        check_digit = 0
+    return check_digit
 
 def convert_to_png(pdf):
     proc = subprocess.Popen(
