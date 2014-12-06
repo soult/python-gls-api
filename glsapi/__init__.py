@@ -99,7 +99,7 @@ class Address:
 class Parcel:
 
     def __init__(self, *args, **kwargs):
-        for k in ["tracking_number", "date", "sender", "recipient", "client", "product", "weight"]:
+        for k in ["tracking_number", "date", "sender", "recipient", "client", "product", "weight", "services"]:
             self.__dict__[k] = kwargs.get(k)
 
     @classmethod
