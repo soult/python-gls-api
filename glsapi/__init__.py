@@ -176,12 +176,28 @@ class GLSBrowser:
 
         return senders
 
-    def get_possible_job_dates(self, product, address):
+    def get_default_product(self, shipper_id, address, article_type="NORMAL"):
+        params = {
+            "articleType": article_type,
+            "deliveryCountry": address.country_code,
+            "deliveryPostalCode": str(address.postal_code),
+            "shipperId": shipper_id,
+            "caller": "wipp003",
+            "millis": self._millis()
+        }
+
+        req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rspp003", params=params)
+
+        for product in req.json()["products"]:
+            if product["selected"] == "Y":
+                return product["articleNo"]
+
+    def get_possible_job_dates(self, shipper_id, address, product):
         params = {
             "pickupCountry": address.country_code,
             "pickupPostalCode": str(address.postal_code),
             "product": str(product),
-            "shipperId": "",
+            "shipperId": shipper_id,
             "caller": "wipp003",
             "millis": self._millis()
         }
