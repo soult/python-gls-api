@@ -223,7 +223,14 @@ class GLSBrowser:
 
         return Parcel.parse(req.json())
 
-    def create_parcel(self, product, job_date, sender_id, sender_address_id, recipient, weight):
+    def _references(self, references):
+        if references == None:
+            return []
+        if isinstance(references, str):
+            return [references]
+        return list(references)
+
+    def create_parcel(self, product, job_date, sender_id, sender_address_id, recipient, weight, references_shipment=None, references_parcel=None):
         headers = {
             "Content-Type": "application/json"
         }
@@ -238,9 +245,9 @@ class GLSBrowser:
             "shipperId": sender_id,
             "shipperAddressId": sender_address_id,
             "consig": recipient.unparse(),
-            "references": [""],
+            "references": self._references(references_shipment),
             "parcels": [{
-                "references": [""],
+                "references": self._references(references_parcel),
                 "weight": "%.2g" % weight
             }]
         }
