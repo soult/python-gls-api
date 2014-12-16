@@ -162,7 +162,7 @@ class GLSBrowser:
             return match.group(1)
         raise LoginFailedException()
 
-    def list_senders(self):
+    def sender_address_id_to_contact_id(self, address_id):
         params = {
             "shipperId": "",
             "caller": "wipp003",
@@ -170,11 +170,11 @@ class GLSBrowser:
         }
         req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rspp002", params=params)
 
-        senders = {}
         for item in req.json()["altShipperAddresses"]:
-            senders[item["contactId"]] = Address.parse(item)
+            if item["addressId"] == address_id:
+                return item["contactId"]
 
-        return senders
+        raise ValueError("Unknown address id")
 
     def get_default_product(self, shipper_id, address, article_type="NORMAL"):
         params = {
