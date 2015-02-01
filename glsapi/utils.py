@@ -49,7 +49,19 @@ def cut_label(png):
         img.size[1]
     ))
 
-    target.paste(img, (0, 0, img.size[0], img.size[1]))
+    img2 = Image.new("RGB", img.size)
+    def map_pixel(pixel):
+        if pixel[3] == 0:
+            return (255, 255, 255)
+
+        intensity = 0.299 * pixel[0] + 0.587  * pixel[1] + 0.114 * pixel[2]
+        if intensity < 127 and pixel[3] > 127:
+            return (0, 0, 0)
+        else:
+            return (255, 255, 255)
+    img2.putdata(list(map(map_pixel, img.getdata())))
+
+    target.paste(img2, (0, 0, img2.size[0], img2.size[1]))
 
     buf = io.BytesIO()
     target.save(buf, "PNG")
