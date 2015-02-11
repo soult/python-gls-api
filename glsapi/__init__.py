@@ -248,7 +248,7 @@ class GLSBrowser:
 
     def create_parcel(self, product, job_date, sender_id, sender_address_id, recipient, weight, references_shipment=None, references_parcel=None):
         headers = {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json; charset=UTF-8"
         }
         params = {
             "shipperId": sender_id,
@@ -274,3 +274,29 @@ class GLSBrowser:
         if "consignementId" in data:
             pdf = self._sess.get(data["labelUrl"]).content
         return (data["consignementId"], pdf)
+
+    def cancel_parcel(self, tracking_number, job_date):
+        headers = {
+            "Content-Type": "application/json; charset=UTF-8"
+        }
+
+        params = {
+            "caller": "wicp001",
+            "milis": self._millis(),
+        }
+        data = {
+            "parcelNos": str(tracking_number),
+            "date": job_date.strftime("%Y-%m-%d"),
+        }
+
+        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rscp002", headers=headers, params=params, data=json.dumps(data))
+
+        if req.status_code != 200:
+            try:
+                data = req.json()
+            except:
+                pass
+            else:
+                if "exceptionText" in data:
+                    raise GLSException("Error while deleting parcel: %s" % data["exceptionText"])
+            raise GLSException("Unknown error while deleting parcel")
