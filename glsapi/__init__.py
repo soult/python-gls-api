@@ -264,7 +264,7 @@ class GLSBrowser:
             "references": self._references(references_shipment),
             "parcels": [{
                 "references": self._references(references_parcel),
-                "weight": "%.2g" % weight
+                "weight": "%.2f" % weight
             }]
         }
 
