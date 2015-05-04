@@ -246,7 +246,7 @@ class GLSBrowser:
             return [references]
         return list(references)
 
-    def create_parcel(self, product, job_date, sender_id, sender_address_id, recipient, weight, references_shipment=None, references_parcel=None):
+    def create_parcel(self, product, job_date, sender_id, sender_address_id, recipient, weight, references_shipment=None, references_parcel=None, guaranteed24=False):
         headers = {
             "Content-Type": "application/json; charset=UTF-8"
         }
@@ -264,9 +264,11 @@ class GLSBrowser:
             "references": self._references(references_shipment),
             "parcels": [{
                 "references": self._references(references_parcel),
-                "weight": "%.2f" % weight
+                "weight": "%.2f" % weight,
             }]
         }
+        if guaranteed24:
+            data["services"] = ["11037"]
 
         req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rspp008", headers=headers, params=params, data=json.dumps(data))
 
