@@ -157,7 +157,7 @@ class GLSBrowser:
             "password": password
         }
         req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rslg001", data=body)
-        match = re.search(r"<li class=\"user\">(.*?)</li>", req.text)
+        match = re.search(r"<nav id=\"logout\">\s+(\w(?:\s|\w)+) <a ng-click=\"callLogout\(\);\">", req.text, re.MULTILINE)
         if match:
             return match.group(1)
         raise LoginFailedException()
