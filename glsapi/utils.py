@@ -22,9 +22,9 @@ def check_digit(tracking_number):
         check_digit = 0
     return check_digit
 
-def convert_to_png(pdf):
+def convert_to_png(pdf, page=1):
     proc = subprocess.Popen(
-        ["gs", "-q", "-sDEVICE=pngalpha", "-sOutputFile=%stdout%", "-r216", "-dNOPAUSE", "-dBATCH", "-dSAFER", "-"],
+        ["gs", "-q", "-sDEVICE=pngalpha", "-sOutputFile=%stdout%", "-dFirstPage=%i" % page, "-dLastPage=%i" % page, "-r216", "-dNOPAUSE", "-dBATCH", "-dSAFER", "-"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE
     )
