@@ -158,24 +158,13 @@ class GLSBrowser:
         }
         req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rslg001", data=body)
 
-        # New GLS system
         match = re.search(r"<nav id=\"logout\">\s+([0-9A-Za-z\-_ ]+) <a ng-click=\"callLogout\(\);\">", req.text, re.MULTILINE)
         if match:
-            self._old = False
-            return match.group(1)
-
-        # Old GLS system
-        match = re.search(r"<li class=\"user\">(.+?)</li>\s+<li class=\"lnkArrow\" data-dojo-type=\"gls.app.logoutHandler\"", req.text, re.MULTILINE)
-        if match:
-            self._old = True
             return match.group(1)
 
         raise LoginFailedException()
 
     def sender_address_id_to_contact_id(self, address_id):
-        if self._old:
-            return address_id
-
         params = {
             "shipperId": "",
             "caller": "wipp003",
@@ -184,7 +173,7 @@ class GLSBrowser:
         req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rspp002", params=params)
 
         for item in req.json()["altShipperAddresses"]:
-            if item["addressId"] == address_id:
+            if item["addressId"] == address_id or item["contactId"] == address_id:
                 return item["contactId"]
 
         raise ValueError("Unknown address id")
