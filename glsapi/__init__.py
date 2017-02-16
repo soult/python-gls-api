@@ -248,7 +248,7 @@ class GLSBrowser:
             return [references]
         return list(references)
 
-    def create_parcel(self, product, job_date, sender_id, sender_address_id, recipient, weight, references_shipment=None, references_parcel=None, guaranteed24=False):
+    def create_parcel(self, product, job_date, sender_id, sender_address_id, recipient, weight, references_shipment=None, references_parcel=None, guaranteed24=False, parcelshop_id=None):
         headers = {
             "Content-Type": "application/json; charset=UTF-8"
         }
@@ -271,6 +271,18 @@ class GLSBrowser:
         }
         if guaranteed24:
             data["services"] = ["11037"]
+        if parcelshop_id:
+            data["services"] = ["11055"]
+            fields = data.setdefault("fields", {})
+            fields["11055_altConsig_contact"] = recipient.name1
+            fields["11055_parcelShopId"] = str(parcelshop_id)
+            if recipient.email:
+                fields["11055_altConsig_email"] = recipient_email
+
+            phone = recipient.mobile or recipient.phone
+            if phone:
+                fields["11055_altConsig_mobile_prefix"] = phone.country_prefix
+                fields["11055_altConsig_mobile_phone"] = phone.number
 
         req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rspp008", headers=headers, params=params, data=json.dumps(data))
 
