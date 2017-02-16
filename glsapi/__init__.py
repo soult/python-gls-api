@@ -277,7 +277,7 @@ class GLSBrowser:
             fields["11055_altConsig_contact"] = recipient.name1
             fields["11055_parcelShopId"] = str(parcelshop_id)
             if recipient.email:
-                fields["11055_altConsig_email"] = recipient_email
+                fields["11055_altConsig_email"] = recipient.email
 
             phone = recipient.mobile or recipient.phone
             if phone:
