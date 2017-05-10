@@ -96,6 +96,40 @@ class Address:
             country_code=data["countryCode"]
         )
 
+class SenderAddress(Address):
+
+    def __init__(self, *args, **kwargs):
+        super(SenderAddress, self).__init__(*args, **kwargs)
+        for k in ["address_id", "contact_id", "contact_name"]:
+            self.__dict__[k] =  kwargs.get(k)
+
+    def unparse(self):
+        data = super(SenderAddress, self).unparse()
+
+        data.update({
+            "addressId": self.address_id,
+            "contactId": self.contact_id,
+            "contactName": self.contact_name,
+        })
+
+        return data
+
+    @classmethod
+    def parse(cls, data):
+        return cls(
+            name1=data.get("name1") or None,
+            name2=data.get("name2") or None,
+            name3=data.get("name3") or None,
+            street1=data.get("street1") or None,
+            street2=data.get("street2") or None,
+            postal_code=data["postalArea"]["postalCode"],
+            city=data["postalArea"]["city"],
+            country_code=data["postalArea"]["countryCode"],
+            address_id=data["addressId"],
+            contact_id=data["contactId"],
+            contact_name=data.get("contactName") or "",
+        )
+
 class Parcel:
 
     def __init__(self, *args, **kwargs):
@@ -164,7 +198,7 @@ class GLSBrowser:
 
         raise LoginFailedException()
 
-    def sender_address_id_to_contact_id(self, address_id):
+    def get_sender_addresses(self):
         params = {
             "shipperId": "",
             "caller": "wipp003",
@@ -172,9 +206,19 @@ class GLSBrowser:
         }
         req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rspp002", params=params)
 
-        for item in req.json()["altShipperAddresses"]:
-            if item["addressId"] == address_id or item["contactId"] == address_id:
-                return item["contactId"]
+        return [SenderAddress.parse(item) for item in req.json()["altShipperAddresses"]]
+
+    def sender_address_id_to_address(self, address_id):
+        for sender_address in self.get_sender_addresses():
+            if sender_address.address_id == address_id or sender_address.contact_id == address_id:
+                return sender_address
+
+        raise ValueError("Unknown address id")
+
+    def sender_address_id_to_contact_id(self, address_id):
+        for sender_address in self.get_sender_addresses():
+            if sender_address.address_id == address_id or sender_address.contact_id == address_id:
+                return sender_address.contact_id
 
         raise ValueError("Unknown address id")
 
