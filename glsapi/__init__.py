@@ -8,6 +8,9 @@ import re
 import requests
 import time
 
+PRODUCT_BUSINESSPARCEL = 10001
+PRODUCT_EUROBUSINESSPARCEL = 10000
+
 class GLSException(Exception):
     pass
 
