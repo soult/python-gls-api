@@ -272,8 +272,14 @@ class GLSBrowser:
         }
         req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rstt003")
 
+        result = req.json()
+        if "lastError" in result:
+            if result["lastError"] == "E998":
+                return []
+            raise GLSException(result["exceptionText"])
+
         parcels = []
-        for item in req.json()["tuStatus"]:
+        for item in result["tuStatus"]:
             parcels.append(Parcel.parse_short(item))
 
         return parcels
