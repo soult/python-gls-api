@@ -138,6 +138,7 @@ class Parcel:
     def __init__(self, *args, **kwargs):
         for k in ["tracking_number", "date", "sender", "recipient", "client", "product", "weight", "services"]:
             self.__dict__[k] = kwargs.get(k)
+        self.__dict__["references"] = kwargs.get("references", [])
 
     @classmethod
     def parse_short(cls, data):
@@ -173,6 +174,9 @@ class Parcel:
                 parcel.weight = decimal.Decimal(item["value"].split(" ")[0])
             elif item["type"] == "SERVICES":
                 parcel.services = item["value"].split(",")
+        for item in data.get("references", []):
+            if item["type"] in ("CUSTREF", "UNITNO"):
+                parcel.references.append(item["value"])
         return parcel
 
     def __str__(self):
