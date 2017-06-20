@@ -144,10 +144,12 @@ class Parcel:
     def parse_short(cls, data):
         parcel = cls(
             tracking_number = data.get("tuNo"),
-            date=datetime.date(*[int(x) for x in data["date"].split("-")])
         )
-        parcel.recipient = Address.parse_area(data["addressInfo"])
-        parcel.recipient.name1 = data.get("consigneeName") or None
+        if "date" in data:
+            parcel.date=datetime.date(*[int(x) for x in data["date"].split("-")])
+        if "adressInfo" in data:
+            parcel.recipient = Address.parse_area(data["addressInfo"])
+            parcel.recipient.name1 = data.get("consigneeName") or None
         return parcel
 
     @classmethod
