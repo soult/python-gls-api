@@ -266,7 +266,7 @@ class GLSBrowser:
 
         return sorted(dates)
 
-    def list_parcels(self, date_start=None, date_end=None, include_cancelled=False):
+    def list_parcels(self, date_start=None, date_end=None):
         date_start = date_start or datetime.date.today()
         date_end = date_end or date_start
 
