@@ -201,6 +201,11 @@ class GLSBrowser:
         }
         req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rslg001", data=body)
 
+        match = re.search(r"stname: \"CSRF-Token\",\s+stvalue: \"([a-f0-9]{32})\"", req.text, re.MULTILINE)
+        if not match:
+            raise LoginFailedException("Unable to locate CSRF token")
+        self._csrf_token = match.group(1)
+
         match = re.search(r"<nav id=\"logout\">\s+([0-9A-Za-z\-_ ]+) <a ng-click=\"callLogout\(\);\">", req.text, re.MULTILINE)
         if match:
             return match.group(1)
@@ -309,7 +314,8 @@ class GLSBrowser:
 
     def create_parcel(self, product, job_date, sender_id, sender_address_id, recipient, weight, references_shipment=None, references_parcel=None, guaranteed24=False, parcelshop_id=None):
         headers = {
-            "Content-Type": "application/json; charset=UTF-8"
+            "Content-Type": "application/json; charset=UTF-8",
+            "CSRF-Token": self._csrf_token,
         }
         params = {
             "shipperId": sender_id,
@@ -342,17 +348,18 @@ class GLSBrowser:
             if phone:
                 fields["11055_altConsig_mobile_prefix"] = phone.country_prefix
                 fields["11055_altConsig_mobile_phone"] = phone.number
-
         req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rspp008", headers=headers, params=params, data=json.dumps(data))
 
         data = req.json()
+
         if "consignementId" in data:
             pdf = self._sess.get(data["labelUrl"]).content
         return (data["consignementId"], pdf)
 
     def cancel_parcel(self, tracking_number, job_date):
         headers = {
-            "Content-Type": "application/json; charset=UTF-8"
+            "Content-Type": "application/json; charset=UTF-8",
+            "CSRF-Token": self._csrf_token,
         }
 
         params = {
