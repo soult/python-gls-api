@@ -345,8 +345,10 @@ class GLSBrowser:
 
         data = req.json()
 
-        if "consignementId" in data:
-            pdf = self._sess.get(data["labelUrl"]).content
+        if not "consignementId" in data:
+            raise GLSBrowser(data["exceptionText"])
+
+        pdf = self._sess.get(data["labelUrl"]).content
         return (data["consignementId"], pdf)
 
     def cancel_parcel(self, tracking_number, job_date):
