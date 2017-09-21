@@ -1,9 +1,7 @@
 __all__ = ["utils"]
 
-import collections
 import datetime
 import decimal
-import json
 import re
 import requests
 import time
@@ -204,7 +202,7 @@ class GLSBrowser:
         match = re.search(r"stname: \"CSRF-Token\",\s+stvalue: \"([a-f0-9]{32})\"", req.text, re.MULTILINE)
         if not match:
             raise LoginFailedException("Unable to locate CSRF token")
-        self._csrf_token = match.group(1)
+        self._sess.headers["Csrf-Token"] = match.group(1)
 
         match = re.search(r"<nav id=\"logout\">\s+([0-9A-Za-z\-_ ]+) <a ng-click=\"callLogout\(\);\">", req.text, re.MULTILINE)
         if match:
@@ -259,7 +257,6 @@ class GLSBrowser:
             "product": str(product),
             "shipperId": shipper_id,
             "caller": "wipp003",
-            "millis": self._millis()
         }
 
         req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rspp007", params=params)
@@ -313,10 +310,6 @@ class GLSBrowser:
         return list(references)
 
     def create_parcel(self, product, job_date, sender_id, sender_address_id, recipient, weight, references_shipment=None, references_parcel=None, guaranteed24=False, parcelshop_id=None):
-        headers = {
-            "Content-Type": "application/json; charset=UTF-8",
-            "CSRF-Token": self._csrf_token,
-        }
         params = {
             "shipperId": sender_id,
             "caller": "wipp003",
@@ -348,7 +341,7 @@ class GLSBrowser:
             if phone:
                 fields["11055_altConsig_mobile_prefix"] = phone.country_prefix
                 fields["11055_altConsig_mobile_phone"] = phone.number
-        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rspp008", headers=headers, params=params, data=json.dumps(data))
+        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rspp008", params=params, json=data)
 
         data = req.json()
 
@@ -357,11 +350,6 @@ class GLSBrowser:
         return (data["consignementId"], pdf)
 
     def cancel_parcel(self, tracking_number, job_date):
-        headers = {
-            "Content-Type": "application/json; charset=UTF-8",
-            "CSRF-Token": self._csrf_token,
-        }
-
         params = {
             "caller": "wicp001",
             "milis": self._millis(),
@@ -371,7 +359,7 @@ class GLSBrowser:
             "date": job_date.strftime("%Y-%m-%d"),
         }
 
-        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rscp002", headers=headers, params=params, data=json.dumps(data))
+        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rscp002", params=params, json=data)
 
         if req.status_code != 200:
             try:
