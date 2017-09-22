@@ -69,7 +69,7 @@ class Address:
             data["phone"] = PhoneNumber.empty().unparse()
 
         if self.mobile:
-            data["mobile"] = mobile.unparse()
+            data["mobile"] = self.mobile.unparse()
         else:
             data["mobile"] = PhoneNumber.empty().unparse()
 
