@@ -351,6 +351,36 @@ class GLSBrowser:
         pdf = self._sess.get(data["labelUrl"]).content
         return (data["consignementId"], pdf)
 
+    def create_return_parcel(self, shipper_id, sender, recipient, references_shipment=None, references_parcel=None):
+        params = {
+            "caller": "wipp006",
+            "millis": self._millis(),
+            "shipperId": shipper_id
+        }
+        data = {
+            "consig": sender.unparse(),
+            "parcels": [
+                {
+                    "references": self._references(references_parcel),
+                }
+            ],
+            "references": self._references(references_shipment),
+            "returnAddress": recipient.unparse(),
+            "settings": {
+                "SAVEPICKUPADDR": "N",
+            },
+        }
+
+        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rspp024", params=params, json=data)
+
+        data = req.json()
+
+        if not "consignmentId" in data:
+            raise GLSBrowser(data["exceptionText"])
+
+        pdf = self._sess.get(data["labelUrl"]).content
+        return (data["consignmentId"], pdf)
+
     def cancel_parcel(self, tracking_number, job_date):
         params = {
             "caller": "wicp001",
