@@ -84,6 +84,8 @@ class Address:
             name3=data.get("name3") or None,
             street1=data.get("street1") or None,
             street2=data.get("street2") or None,
+            block_no1=data.get("blockNo1") or None,
+            block_no2=data.get("blockNo2") or None,
             postal_code=data["postalArea"]["postalCode"],
             city=data["postalArea"]["city"],
             country_code=data["postalArea"]["countryCode"]
@@ -123,6 +125,8 @@ class SenderAddress(Address):
             name3=data.get("name3") or None,
             street1=data.get("street1") or None,
             street2=data.get("street2") or None,
+            block_no1=data.get("blockNo1") or None,
+            block_no2=data.get("blockNo2") or None,
             postal_code=data["postalArea"]["postalCode"],
             city=data["postalArea"]["city"],
             country_code=data["postalArea"]["countryCode"],
