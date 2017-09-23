@@ -350,7 +350,7 @@ class GLSBrowser:
         data = req.json()
 
         if not "consignementId" in data:
-            raise GLSBrowser(data["exceptionText"])
+            raise GLSException(data["exceptionText"])
 
         pdf = self._sess.get(data["labelUrl"]).content
         return (data["consignementId"], pdf)
@@ -380,7 +380,7 @@ class GLSBrowser:
         data = req.json()
 
         if not "consignmentId" in data:
-            raise GLSBrowser(data["exceptionText"])
+            raise GLSException(data["exceptionText"])
 
         pdf = self._sess.get(data["labelUrl"]).content
         return (data["consignmentId"], pdf)
