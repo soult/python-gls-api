@@ -209,12 +209,12 @@ class GLSBrowser:
         self._sess.headers["Csrf-Token"] = match.group(1)
 
         # Old page
-        match = re.search(r"<nav id=\"logout\">\s+([0-9A-Za-z\-_ ]+) <a ng-click=\"callLogout\(\);\">", req.text, re.MULTILINE)
+        match = re.search(r"<nav id=\"logout\">\s+([0-9A-Za-z\.\-_ ]+) <a ng-click=\"callLogout\(\);\">", req.text, re.MULTILINE)
         if match:
             return match.group(1)
 
         # New page
-        match = re.search(r"<li class=\"nav-item\">\s+<span class=\"nav-link\"><i class=\"fa fa-user\"></i> ([0-9A-Za-z\-_ ]+) </span>\s+</li>", req.text, re.MULTILINE)
+        match = re.search(r"<li class=\"nav-item\">\s+<span class=\"nav-link\"><i class=\"fa fa-user\"></i> ([0-9A-Za-z\.\-_ ]+) </span>\s+</li>", req.text, re.MULTILINE)
         if match:
             return match.group(1)
 
