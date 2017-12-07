@@ -201,7 +201,7 @@ class GLSBrowser:
             "username": username,
             "password": password
         }
-        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rslg001", data=body)
+        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rslg001", data=body, timeout=10)
 
         match = re.search(r"stname: \"CSRF-Token\",\s+stvalue: \"([a-f0-9]{32})\"", req.text, re.MULTILINE)
         if not match:
@@ -226,7 +226,7 @@ class GLSBrowser:
             "caller": "wipp003",
             "millis": self._millis()
         }
-        req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rspp002", params=params)
+        req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rspp002", params=params, timeout=10)
 
         return [SenderAddress.parse(item) for item in req.json()["altShipperAddresses"]]
 
@@ -254,7 +254,7 @@ class GLSBrowser:
             "millis": self._millis()
         }
 
-        req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rspp003", params=params)
+        req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rspp003", params=params, timeout=10)
 
         for product in req.json()["products"]:
             if product["selected"] == "Y":
@@ -269,7 +269,7 @@ class GLSBrowser:
             "caller": "wipp003",
         }
 
-        req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rspp007", params=params)
+        req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rspp007", params=params, timeout=10)
 
         dates = []
         for item in req.json()["allowedDates"]:
@@ -288,7 +288,7 @@ class GLSBrowser:
             "caller": "witt004",
             "millis": self._millis()
         }
-        req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rstt003")
+        req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rstt003", timeout=10)
 
         result = req.json()
         if "lastError" in result:
@@ -308,7 +308,7 @@ class GLSBrowser:
             "caller": "witt004",
             "milis": self._millis()
         }
-        req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rstt004/%s" % tracking_number, params=params)
+        req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rstt004/%s" % tracking_number, params=params, timeout=10)
 
         return Parcel.parse(req.json())
 
@@ -351,7 +351,7 @@ class GLSBrowser:
             if phone:
                 fields["11055_altConsig_mobile_prefix"] = phone.country_prefix
                 fields["11055_altConsig_mobile_phone"] = phone.number
-        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rspp008", params=params, json=data)
+        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rspp008", params=params, json=data, timeout=10)
 
         data = req.json()
 
@@ -381,7 +381,7 @@ class GLSBrowser:
             },
         }
 
-        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rspp024", params=params, json=data)
+        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rspp024", params=params, json=data, timeout=10)
 
         data = req.json()
 
@@ -401,7 +401,7 @@ class GLSBrowser:
             "date": job_date.strftime("%Y-%m-%d"),
         }
 
-        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rscp002", params=params, json=data)
+        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rscp002", params=params, json=data, timeout=10)
 
         if req.status_code != 200:
             try:
