@@ -220,6 +220,13 @@ class GLSBrowser:
 
         raise LoginFailedException()
 
+    def logout(self):
+        params = {
+            "caller": "page",
+            "millis": self._millis(),
+        }
+        self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rslg002", params=params, timeout=10)
+
     def get_sender_addresses(self):
         params = {
             "shipperId": "",
