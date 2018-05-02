@@ -191,10 +191,15 @@ class GLSBrowser:
 
     def __init__(self):
         self._sess = requests.Session()
+        self._sess.hooks["response"].append(self._parse_subsession)
         req = self._sess.get("https://gls-group.eu/DE/de/home")
 
     def _millis(self):
         return str(int(time.time() * 1000))
+
+    def _parse_subsession(self, resp, **kwargs):
+        if "subsessionid" in resp.headers:
+            self._sess.headers["subSessionId"] = resp.headers["subsessionid"]
 
     def login(self, username, password):
         body = {
@@ -396,7 +401,27 @@ class GLSBrowser:
             raise GLSException(data["exceptionText"])
 
         pdf = self._sess.get(data["labelUrl"]).content
-        return (data["consignmentId"], pdf)
+        return (data["consignmentId"], data["labelId"], pdf)
+
+    def send_return_parcel_email(self, label_id, email, send_link=False):
+        params = {
+            "caller": "wipp006",
+            "millis": self._millis(),
+            "labelId": label_id,
+            "email": email,
+            "sendLink": str(send_link).lower(),
+        }
+
+        req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rspp025", params=params, json={}, timeout=10)
+        if req.status_code != 200:
+            try:
+                data = req.json()
+            except:
+                pass
+            else:
+                if "exceptionText" in data:
+                    raise GLSException("Error while sending return parcel email: %s" % data["exceptionText"])
+            raise GLSException("Unknown error while sending return parcel email")
 
     def cancel_parcel(self, tracking_number, job_date):
         params = {
