@@ -331,7 +331,7 @@ class GLSBrowser:
             return [references]
         return list(references)
 
-    def create_parcel(self, product, job_date, sender_id, sender_address_id, recipient, weight, references_shipment=None, references_parcel=None, comment_parcel=None, guaranteed24=False, parcelshop_id=None):
+    def create_parcel(self, product, job_date, sender_id, sender_address_id, recipient, weight, references_shipment=None, references_parcel=None, comment_parcel=None, guaranteed24=False, parcelshop_id=None, flexdelivery=False):
         params = {
             "shipperId": sender_id,
             "caller": "wipp003",
@@ -353,6 +353,8 @@ class GLSBrowser:
             "references": self._references(references_shipment),
             "parcels": [parcel]
         }
+        if flexdelivery:
+            data["services"] = ["11069"]
         if guaranteed24:
             data["services"] = ["11037"]
         if parcelshop_id:
