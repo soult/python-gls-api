@@ -22,10 +22,6 @@ class PhoneNumber:
             self.__dict__[k] = kwargs.get(k)
 
     @classmethod
-    def empty(cls):
-        return cls()
-
-    @classmethod
     def parse(cls, data):
         return cls(
             country_prefix=data["countryPrefix"],
@@ -47,12 +43,8 @@ class Address:
     def unparse(self):
         data = {
             "name1": self.name1,
-            "name2": self.name2 or "",
-            "name3": self.name3 or "",
             "street1": self.street1,
-            "street2": self.street2 or "",
             "blockNo1": self.block_no1 or "",
-            "blockNo2": self.block_no2 or "",
             "postalArea": {
                 "city": self.city,
                 "postalCodeDisplay": str(self.postal_code),
@@ -60,18 +52,29 @@ class Address:
                 "countryCode": self.country_code,
                 "postalCode": str(self.postal_code)
             },
-            "email": self.email or "",
         }
+        if self.name2:
+            data["name2"] = self.name2
+        if self.name3:
+            data["name3"] = self.name3
+
+        if self.street2:
+            data["street2"] = self.street2
+        if self.block_no2:
+            data["blockNo2"] = self.block_no2
 
         if self.phone:
             data["phone"] = self.phone.unparse()
         else:
-            data["phone"] = PhoneNumber.empty().unparse()
+            data["phone"] = {}
 
         if self.mobile:
             data["mobile"] = self.mobile.unparse()
         else:
-            data["mobile"] = PhoneNumber.empty().unparse()
+            data["mobile"] = {}
+
+        if self.email:
+            data["email"] = self.email
 
         return data
 
@@ -335,15 +338,16 @@ class GLSBrowser:
         params = {
             "shipperId": sender_id,
             "caller": "wipp003",
-            "milis": self._millis()
+            "millis": self._millis()
         }
 
         parcel = {
+            "articleInfos": {},
             "references": self._references(references_parcel),
             "weight": "%.2f" % weight,
         }
         if comment_parcel:
-            parcel["articleInfos"] = {"product_45800": comment_parcel}
+            parcel["articleInfos"]["product_45800"] = comment_parcel
         data = {
             "product": str(product),
             "jobDate": job_date.strftime("%Y-%m-%d"),
@@ -351,14 +355,15 @@ class GLSBrowser:
             "shipperAddressId": sender_address_id,
             "consig": recipient.unparse(),
             "references": self._references(references_shipment),
-            "parcels": [parcel]
+            "parcels": [parcel],
+            "services": [],
         }
         if flexdelivery:
-            data["services"] = ["11069"]
+            data["services"].append("11069")
         if guaranteed24:
-            data["services"] = ["11037"]
+            data["services"].append("11037")
         if parcelshop_id:
-            data["services"] = ["11055"]
+            data["services"].append("11055")
             fields = data.setdefault("fields", {})
             fields["11055_altConsig_contact"] = recipient.name1
             fields["11055_parcelShopId"] = str(parcelshop_id)
@@ -369,6 +374,7 @@ class GLSBrowser:
             if phone:
                 fields["11055_altConsig_mobile_prefix"] = phone.country_prefix
                 fields["11055_altConsig_mobile_phone"] = phone.number
+
         req = self._sess.post("https://gls-group.eu/app/service/closed/rest/DE/de/rspp008", params=params, json=data, timeout=10)
 
         data = req.json()
