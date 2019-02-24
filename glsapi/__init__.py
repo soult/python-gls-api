@@ -259,21 +259,21 @@ class GLSBrowser:
 
         raise ValueError("Unknown address id")
 
-    def get_default_product(self, shipper_id, address, article_type="NORMAL"):
+    def get_product_config(self, shipper_id, address, article_type="NORMAL", default_product=PRODUCT_BUSINESSPARCEL):
         params = {
             "articleType": article_type,
             "deliveryCountry": address.country_code,
+            "deliveryCity": address.city,
             "deliveryPostalCode": str(address.postal_code),
             "shipperId": shipper_id,
             "caller": "wipp003",
-            "millis": self._millis()
+            "millis": self._millis(),
+            "defaultServiceArticleNoList": "",
+            "defaultProduct": default_product,
         }
-
         req = self._sess.get("https://gls-group.eu/app/service/closed/rest/DE/de/rspp003", params=params, timeout=10)
 
-        for product in req.json()["products"]:
-            if product["selected"] == "Y":
-                return product["articleNo"]
+        return req.json()
 
     def get_possible_job_dates(self, shipper_id, address, product):
         params = {
