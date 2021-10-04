@@ -222,7 +222,7 @@ class GLSBrowser:
             return match.group(1)
 
         # New page
-        match = re.search(r"<li class=\"nav-item\" id=\"global_nav_username\">\s+<span class=\"nav-link\"><i class=\"fa fa-user\"></i> ([0-9A-Za-z\.\-_ ]+)</span>\s+</li>", req.text, re.MULTILINE)
+        match = re.search(r"<li class=\"nav-item nav-top\" id=\"global_nav_username\">\s+<span class=\"nav-link\"><i class=\"fa fa-user\"></i> ([0-9A-Za-z\.\-_ ]+)</span>\s+</li>", req.text, re.MULTILINE)
         if match:
             return match.group(1)
 
